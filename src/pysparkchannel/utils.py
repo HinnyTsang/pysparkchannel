@@ -16,6 +16,8 @@ def chained(func: Callable) -> Callable:
 def fluent(cls: type) -> type:
     """Decorator for function to allow method chaining for all method"""
     for name, member in cls.__dict__.items():
+        if name == "__init__":
+            continue
         if callable(member):
             setattr(cls, name, chained(member))
     return cls
