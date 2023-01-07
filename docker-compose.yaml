@@ -1,7 +1,0 @@
-version: '3'
-services:
-  pyspark:
-    build: .
-    working_dir: /usr/local/src
-    ports:
-      - 8888:8888
