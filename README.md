@@ -16,12 +16,12 @@ See [example notebook](./example/example.ipynb).
 
 Go to your project directory and run the following command
 
-### 1. If svn installed
+### 1. If svn installed (Recommended)
 
 Run
 
 ```bash
-svn checkout https://github.com/HinnyTsang/pysparkchannel/tree/main/pysparkchannesl
+svn checkout https://github.com/HinnyTsang/pysparkchannel/trunk/pysparkchannel
 ```
 
 ### 2. Only git installed
