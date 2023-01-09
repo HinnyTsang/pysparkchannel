@@ -10,12 +10,12 @@ Folder = Dict[str, File]
 Folder = Dict[str, Union[File, Folder]]
 
 JSON_STRING="""$JSON_STRING$"""
-BASE_PATH="""$BASE_PATH$"""
+BASE_PATH="""dest"""
 
 def decode_expression(expression):
     """Decode expression"""
     return expression \
-        .replace('`````', '"') \
+        .replace('"""""', '"') \
         .replace("\n", "\\n") \
         .replace('""""', '"\\"\\"\\"') \
         .replace('"""', '\\"\\"\\"')

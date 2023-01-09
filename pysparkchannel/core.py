@@ -72,7 +72,9 @@ class ModuleParser():
 
     def module_to_json(self) -> None:
         """Convert modules dict to json"""
-        self.parsed_modules = json.dumps(self.modules)
+        self.parsed_modules = json \
+            .dumps(self.modules) \
+            .replace('"', '`')
 
     def reconstruct_modules(self, base_path: str = "", force: bool = True) -> None:
         """Reconstruct the modules from the json string"""
@@ -113,17 +115,19 @@ class ModuleParser():
 
     def generate_script(self, base_path=""):
         """Generate script to be eval on spark cluster"""
-
         self.module_to_json()
 
         real_path = os.path.dirname(os.path.realpath(__file__))
         script_path = os.path.join(real_path, "script.py")
 
-        with open(script_path, "r", encoding="utf-8") as file:
-            script = file.read()
+        try:
+            with open(script_path, "r", encoding="utf-8") as file:
+                script = file.read()
+        except:
+            raise FileExistsError(f"Cannot read file: {script_path}")
 
         return script \
-            .replace("$JSON_STRING$", self.parsed_modules.replace('"', '`````')) \
+            .replace('"', '`') \
             .replace("$BASE_PATH$", base_path)
 
     def show(self) -> None:
