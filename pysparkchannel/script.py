@@ -1,32 +1,36 @@
 """
-Script to regenerate the file structure base on the JSON file
+Script to rebuild the filestructure from the given binary string
 """
 import json
 import os
-from typing import Dict, Union
+from typing import Dict, Iterable, Union
 
 File = str
-Folder = Dict[str, File]
-Folder = Dict[str, Union[File, Folder]]
+Folder = Dict[str, Union[File, Iterable["Folder"]]]
 
-JSON_STRING="""$JSON_STRING$"""
-BASE_PATH="""$BASE_PATH$"""
+JSON_FILE="parsed_modules.json"
+BASE_PATH="test"
 
-def decode_expression(expression):
-    """Decode expression"""
-    return expression \
-        .replace('`````', '"') \
-        .replace("\n", "\\n") \
-        .replace('""""', '"\\"\\"\\"') \
-        .replace('"""', '\\"\\"\\"')
+def decode_string(string: str) -> str:
+    """
+    Decode ord string to original string
+    """
+    str_to_ord_list = string.split(" ")
 
-def reconstruct_modules(base_path: str = "", force: bool = True) -> None:
+    if len(str_to_ord_list) == 0:
+        return ""
+
+    decoded_str = "".join(chr(int(s)) if len(s) > 0 else "" for s in str_to_ord_list)
+    return decoded_str
+
+def reconstruct_modules(json_file: str = "", base_path: str="", force: bool = True) -> None:
     """Reconstruct the modules from the json string"""
-    if os.path.exists(base_path) and not force:
-        raise FileExistsError(f"Directory Exist {base_path}.")
 
-    os.makedirs(base_path, exist_ok=True)
-    loaded_modules: Dict[str, Folder] = json.loads(decode_expression(JSON_STRING))
+    with open(json_file, "r", encoding="utf-8") as file:
+        parsed_modules = file.read()
+
+    loaded_modules: Dict[str, Folder] = json.loads(parsed_modules)
+
     for path, contains in loaded_modules.items():
         reconstruct_path(base_path, path, contains, force)
 
@@ -44,7 +48,7 @@ def reconstruct_path(
     if isinstance(contains, str):
         print(f"Reconstructing file {full_path}")
         with open(full_path, "w", encoding="utf-8") as file:
-            file.write(contains)
+            file.write(decode_string(contains))
 
     elif isinstance(contains, dict):
         print(f"Reconstructing folder {full_path}")
@@ -58,9 +62,7 @@ def reconstruct_path(
 
 def main():
     """Main function of this script"""
-
-    reconstruct_modules(decode_expression(BASE_PATH))
-
+    reconstruct_modules(JSON_FILE, BASE_PATH, True)
 
 if __name__ == "__main__":
     main()

@@ -6,7 +6,7 @@ import glob
 import json
 import os
 from typing import Dict, Iterable, Union
-from pysparkchannel.utils import fluent
+from pysparkchannel.utils import fluent, encode_string
 
 parser_ignore = ["__pycache__", "pysparkchannel"]
 
@@ -68,7 +68,7 @@ class ModuleParser():
             print("   " * layer + f"{'|__'}  {file_name}")
 
         with open(full_path, "r", encoding="utf-8") as file:
-            parent[full_path] = file.read()
+            parent[full_path] = encode_string(file.read())
 
     def module_to_json(self) -> None:
         """Convert modules dict to json"""
@@ -113,7 +113,7 @@ class ModuleParser():
         else:
             raise ValueError(f"Unknown file type {contains}")
 
-    def generate_script(self, base_path=""):
+    def generate_script(self):
         """Generate script to be eval on spark cluster"""
         self.module_to_json()
 
@@ -126,9 +126,7 @@ class ModuleParser():
         except:
             raise FileExistsError(f"Cannot read file: {script_path}")
 
-        return script \
-            .replace('"', '`') \
-            .replace("$BASE_PATH$", base_path)
+        return script
 
     def show(self) -> None:
         """Show all parsed module"""

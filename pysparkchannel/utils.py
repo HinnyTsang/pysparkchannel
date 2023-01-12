@@ -21,3 +21,10 @@ def fluent(cls: type) -> type:
         if callable(member):
             setattr(cls, name, chained(member))
     return cls
+
+
+def encode_string(string: str) -> str:
+    """
+    Encode normal string to ord string
+    """
+    return ' '.join(str(c) for c in map(ord, string))
