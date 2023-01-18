@@ -6,12 +6,15 @@ import glob
 import json
 import os
 from typing import Dict, Iterable, Union
-from pysparkchannel.utils import fluent, encode_string
+from pysparkchannel.utils import fluent, encode_string, encode_binary_string
 
 parser_ignore = ["__pycache__", "pysparkchannel"]
 
 File = str
 Folder = Dict[str, Union[File, Iterable['Folder']]]
+text_ext_support = ['.py', '.txt', '.csv', '.ipynb']
+binary_ext_support = ['.xlsx']
+
 
 @fluent
 class ModuleParser():
@@ -67,14 +70,25 @@ class ModuleParser():
         if self.verbose:
             print("   " * layer + f"{'|__'}  {file_name}")
 
-        with open(full_path, "r", encoding="utf-8") as file:
-            parent[full_path] = encode_string(file.read())
+        _, file_extension = os.path.splitext(file_name)
+
+        if file_extension in text_ext_support:
+            # Read text file
+            with open(full_path, "r", encoding="utf-8") as file:
+                parent[full_path] = encode_string(file.read())
+
+        elif file_extension in binary_ext_support:
+            # Read binary files
+            with open(full_path, "rb") as file:
+                parent[full_path] = encode_binary_string(file.read())
+        else:
+            raise NotImplementedError(
+                f"File extension '{file_extension}' are currently not supported"
+            )
 
     def module_to_json(self) -> None:
         """Convert modules dict to json"""
-        self.parsed_modules = json \
-            .dumps(self.modules) \
-            .replace('"', '`')
+        self.parsed_modules = json.dumps(self.modules)
 
     def reconstruct_modules(self, base_path: str = "", force: bool = True) -> None:
         """Reconstruct the modules from the json string"""

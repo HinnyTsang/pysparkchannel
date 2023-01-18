@@ -11,6 +11,9 @@ Folder = Dict[str, Union[File, Iterable["Folder"]]]
 JSON_FILE="parsed_modules.json"
 BASE_PATH="test"
 
+text_ext_support = ['.py', '.txt', '.csv', '.ipynb']
+binary_ext_support = ['.xlsx']
+
 def decode_string(string: str) -> str:
     """
     Decode ord string to original string
@@ -22,6 +25,12 @@ def decode_string(string: str) -> str:
 
     decoded_str = "".join(chr(int(s)) if len(s) > 0 else "" for s in str_to_ord_list)
     return decoded_str
+
+def decode_binary_string(string: str) -> bytes:
+    """
+    Decode ord string to origin al string
+    """
+    return bytearray(map(int, string.split(" ")))
 
 def reconstruct_modules(json_file: str = "", base_path: str="", force: bool = True) -> None:
     """Reconstruct the modules from the json string"""
@@ -47,8 +56,23 @@ def reconstruct_path(
 
     if isinstance(contains, str):
         print(f"Reconstructing file {full_path}")
-        with open(full_path, "w", encoding="utf-8") as file:
-            file.write(decode_string(contains))
+
+        _, file_extension = os.path.splitext(full_path)
+
+        if file_extension in text_ext_support:
+            # Read text file
+            with open(full_path, "w", encoding="utf-8") as file:
+                file.write(decode_string(contains))
+
+        elif file_extension in binary_ext_support:
+            # Read binary files
+            with open(full_path, "wb") as file:
+                file.write(decode_binary_string(contains))
+        else:
+            raise NotImplementedError(
+                f"File extension '{file_extension}' are currently not supported"
+            )
+
 
     elif isinstance(contains, dict):
         print(f"Reconstructing folder {full_path}")
